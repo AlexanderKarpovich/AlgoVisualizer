@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QHBoxLayout,
                              QVBoxLayout, QLabel, QComboBox,
                              QSlider, QPushButton)
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPainter, QColor
+from algorithms import BubbleSortWidget
 
 
 class ControlPanel(QWidget):
@@ -91,23 +92,6 @@ class VisualizationArea(QWidget):
     def init_ui(self):
         layout = QVBoxLayout(self)
 
-        # test
-        placeholder = QLabel('Visualization Area')
-        placeholder.setAlignment(Qt.AlignCenter)
-
-        layout.addWidget(placeholder)
-
-        # styles
-        self.setStyleSheet("""
-                    QWidget {
-                        background-color: white;
-                    }
-                    QLabel {
-                        font-size: 24px;
-                        color: #666666;
-                    }
-                """)
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -124,7 +108,7 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout(central_widget)
 
         control_panel = ControlPanel()
-        visualization_area = VisualizationArea()
+        self.visualization_area = VisualizationArea()
 
         # connecting signals
         control_panel.start_signal.connect(self.start_visualization)
@@ -132,10 +116,13 @@ class MainWindow(QMainWindow):
         control_panel.reset_signal.connect(self.reset_visualization)
 
         main_layout.addWidget(control_panel, stretch=1)
-        main_layout.addWidget(visualization_area, stretch=4)
+        main_layout.addWidget(self.visualization_area, stretch=4)
 
     def start_visualization(self):
-        print('starting')
+        widget = BubbleSortWidget()
+        layout = self.visualization_area.layout()
+        layout.addWidget(widget)
+        widget.start_sorting()
 
     def pause_visualization(self):
         print('pausing')
