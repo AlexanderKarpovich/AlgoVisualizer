@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QHBoxLayout,
                              QSlider, QPushButton)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QPainter, QColor
-from algorithms import BubbleSortWidget
+from algorithms import BubbleSortWidget, QuickSortWidget
 
 
 class ControlPanel(QWidget):
@@ -25,8 +25,8 @@ class ControlPanel(QWidget):
         # algorithms list
         algorithm_label = QLabel('Select Algorithm:')
         algorithm_label.setObjectName('algorithm_label')
-        algorithm_combo = QComboBox()
-        algorithm_combo.addItems([
+        self.algorithm_combo = QComboBox()
+        self.algorithm_combo.addItems([
             'Bubble Sort',
             'Quick Sort',
             'Merge Sort',
@@ -34,8 +34,9 @@ class ControlPanel(QWidget):
             'DFS',
             'BFS'
         ])
+
         layout.addWidget(algorithm_label)
-        layout.addWidget(algorithm_combo)
+        layout.addWidget(self.algorithm_combo)
 
         # speed slider
         speed_label = QLabel('Animation Speed:')
@@ -107,22 +108,36 @@ class MainWindow(QMainWindow):
 
         main_layout = QHBoxLayout(central_widget)
 
-        control_panel = ControlPanel()
+        self.control_panel = ControlPanel()
         self.visualization_area = VisualizationArea()
 
         # connecting signals
-        control_panel.start_signal.connect(self.start_visualization)
-        control_panel.pause_signal.connect(self.pause_visualization)
-        control_panel.reset_signal.connect(self.reset_visualization)
+        self.control_panel.start_signal.connect(self.start_visualization)
+        self.control_panel.pause_signal.connect(self.pause_visualization)
+        self.control_panel.reset_signal.connect(self.reset_visualization)
 
-        main_layout.addWidget(control_panel, stretch=1)
+        main_layout.addWidget(self.control_panel, stretch=1)
         main_layout.addWidget(self.visualization_area, stretch=4)
 
     def start_visualization(self):
-        widget = BubbleSortWidget()
+        self.algo_widgets = {
+            'Bubble Sort': BubbleSortWidget(),
+            'Quick Sort': QuickSortWidget()
+        }
+        algo = self.control_panel.algorithm_combo.currentText()
+        widget = self.algo_widgets[algo]
         layout = self.visualization_area.layout()
+        self.clear_layout(layout)
         layout.addWidget(widget)
         widget.start_sorting()
+
+    def clear_layout(self, layout):
+        if layout.count() > 0:
+            for i in range(layout.count()):
+                widget_to_remove = layout.itemAt(i).widget()
+                if widget_to_remove is not None:
+                    layout.removeWidget(widget_to_remove)
+                    widget_to_remove.deleteLater()
 
     def pause_visualization(self):
         print('pausing')
